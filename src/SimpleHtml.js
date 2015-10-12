@@ -1,20 +1,24 @@
 ﻿(function () {
     /*
         Javascript library to load web, data using html elements attributes
-        
+        Message: {Type: Error, Text: There is an error}
     */
     var SimpleHtml = {
         VERSION: "0.1",
         ClassName: "simple-html",
         JsonDataAttributeName: "sh-data-json",
-        Message: "",
+        Messages: [],
         Error: "",
+        // events
+        LogChange: null,
+        
 
         htmlAjax: function () {
             //console.log(arguments);
+            this.log("arguments", "Info", arguments);
 
             if (arguments.length === 0) {
-                Message = "arguments empty.";
+                this.log("arguments empty.");
                 return false;
             }
 
@@ -23,11 +27,11 @@
             var element = args.shift(),
                 shData = args.shift();
 
-            //console.log(element);
+            this.log(null, null, element);
             //console.log(shData);
 
             if (!element || !shData) {
-                Message = "invalid parameters";
+                this.log("Invalid parameters");
                 return false;
             }
 
@@ -70,7 +74,7 @@
             }
             
             if (!xhr) {
-                Message = "Can not create XMLHTTP instance.";
+                this.log( "Can not create XMLHTTP instance.");
                 return false;
             }
             
@@ -106,6 +110,20 @@
             
             
         },
+        
+        log: function(text, type, data) {
+            type = type || "Info";
+            this.Messages.push({
+                Type: type, 
+                Text: text, 
+                Data: data,
+                DateTime: new Date()
+                });
+            if (this.LogChange && typeof this.LogChange === 'function')
+            {
+                this.LogChange.call(this, this.Messages);
+            }
+        },
 
         addEvent: function (element, eventName, fn) {
             if (element.addEventListener) {
@@ -119,16 +137,15 @@
 
     }
 
-
     //console.log("Version: ", SimpleHtml.VERSION);
     SimpleHtml.addEvent(window, "load", function () {
-        
+                 
         var simpleHtmls = document.getElementsByClassName(SimpleHtml.ClassName);
         [].forEach.call(simpleHtmls, function(element) {
             //console.log(element.getAttribute(SimpleHtml.JsonDataAttributeName));
             var shData = JSON.parse(element.getAttribute(SimpleHtml.JsonDataAttributeName));
             SimpleHtml.htmlAjax(element, shData);
-        })
+        });
         
         // $(".simple-html").each(function () {
         //     var shData = JSON.parse($(this).attr("sh-data-json"));
@@ -138,5 +155,9 @@
         // });
 
     });
+    
+    SimpleHtml.LogChange = function(messages){
+        console.log(messages[messages.length - 1]);
+    }
 
 }());
