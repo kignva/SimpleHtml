@@ -1,18 +1,21 @@
 ﻿(function () {
     /*
         Javascript library to load web, data using html elements attributes
-        
+        Message: {Type: Error, Text: There is an error}
     */
     var SimpleHtml = {
         VERSION: "0.1",
         ClassName: "simple-html",
         JsonDataAttributeName: "sh-data-json",
-        Message: "",
+        Messages: [],
         Error: "",
+        // events
+        LogChange: null,
+        
 
         htmlAjax: function () {
             if (arguments.length === 0) {
-                Message = "arguments empty.";
+                this.log("arguments empty.");
                 return false;
             }
 
@@ -22,7 +25,7 @@
                 shData = args.shift();
 
             if (!element || !shData) {
-                Message = "invalid parameters";
+                this.log("Invalid parameters");
                 return false;
             }
 
@@ -31,13 +34,13 @@
                 type: 'GET',
                 dataType: 'HTML',
                 success: function (html) {
+                    //element.html("").append(html);
                     element.innerHTML = html;
                 }
 
             });
 
         },
-        
         
         /*
             query string format: "name=value&anothername="+encodeURIComponent(myVar)+"&so=on"
@@ -64,12 +67,11 @@
             }
             
             if (!xhr) {
-                Message = "Can not create XMLHTTP instance.";
+                this.log( "Can not create XMLHTTP instance.");
                 return false;
             }
             
             xhr.onreadystatechange = function() {
-                
                 if (xhr.readyState === 4)   // complete 
                 {
                     if (xhr.status === 200)  // Success 
@@ -100,6 +102,20 @@
             
             
         },
+        
+        log: function(text, type, data) {
+            type = type || "Info";
+            this.Messages.push({
+                Type: type, 
+                Text: text, 
+                Data: data,
+                DateTime: new Date()
+                });
+            if (this.LogChange && typeof this.LogChange === 'function')
+            {
+                this.LogChange.call(this, this.Messages);
+            }
+        },
 
         addEvent: function (element, eventName, fn) {
             if (element.addEventListener) {
@@ -113,17 +129,16 @@
 
     }
 
-
-    //console.log("Version: ", SimpleHtml.VERSION);
     SimpleHtml.addEvent(window, "load", function () {
-        
         var simpleHtmls = document.getElementsByClassName(SimpleHtml.ClassName);
         [].forEach.call(simpleHtmls, function(element) {
-            //console.log(element.getAttribute(SimpleHtml.JsonDataAttributeName));
             var shData = JSON.parse(element.getAttribute(SimpleHtml.JsonDataAttributeName));
             SimpleHtml.htmlAjax(element, shData);
-        })
-
+        });
     });
+    
+    SimpleHtml.LogChange = function(messages){
+        //console.log(messages[messages.length - 1]);
+    }
 
 }());
