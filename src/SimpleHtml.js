@@ -4,18 +4,17 @@
         Message: {Type: Error, Text: There is an error}
     */
     var SimpleHtml = {
-        VERSION: "0.1",
+        VERSION: "0.1.1",
         ClassName: "simple-html",
         JsonDataAttributeName: "sh-data-json",
         Messages: [],
-        Error: "",
         // events
         LogChange: null,
         
 
         htmlAjax: function () {
             //console.log(arguments);
-            this.log("arguments", "Info", arguments);
+            //this.log("arguments", "Info", arguments);
 
             if (arguments.length === 0) {
                 this.log("arguments empty.");
@@ -27,7 +26,7 @@
             var element = args.shift(),
                 shData = args.shift();
 
-            this.log(null, null, element);
+            //this.log(null, null, element);
             //console.log(shData);
 
             if (!element || !shData) {
@@ -35,7 +34,7 @@
                 return false;
             }
 
-            SimpleHtml.ajax({
+            this.ajax({
                 url: shData.url,
                 type: 'GET',
                 dataType: 'HTML',
@@ -43,11 +42,8 @@
                     //element.html("").append(html);
                     element.innerHTML = html;
                 }
-
             });
-
         },
-        
         
         /*
             query string format: "name=value&anothername="+encodeURIComponent(myVar)+"&so=on"
@@ -79,7 +75,6 @@
             }
             
             xhr.onreadystatechange = function() {
-                
                 if (xhr.readyState === 4)   // complete 
                 {
                     if (xhr.status === 200)  // Success 
@@ -107,8 +102,6 @@
             }
             
             xhr.send(options.data);
-            
-            
         },
         
         log: function(text, type, data) {
@@ -146,18 +139,11 @@
             var shData = JSON.parse(element.getAttribute(SimpleHtml.JsonDataAttributeName));
             SimpleHtml.htmlAjax(element, shData);
         });
-        
-        // $(".simple-html").each(function () {
-        //     var shData = JSON.parse($(this).attr("sh-data-json"));
-
-        //     //console.log(shData);
-        //     SimpleHtml.htmlAjax(this, shData);
-        // });
 
     });
     
     SimpleHtml.LogChange = function(messages){
-        console.log(messages[messages.length - 1]);
+        //console.log(messages[messages.length - 1]);
     }
 
 }());
