@@ -1,4 +1,4 @@
-﻿(function () {
+﻿//(function () {
     /*
         Javascript library to load web, data using html elements attributes
         Message: {Type: Error, Text: There is an error}
@@ -9,12 +9,11 @@
         JsonDataAttributeName: "sh-data-json",
         Messages: [],
         // events
-        LogChange: null,
-        
+        LogChange: null,  
 
-        htmlAjax: function () {
+        render: function () {
             //console.log(arguments);
-            //this.log("arguments", "Info", arguments);
+            this.log("arguments", "Info", arguments);
 
             if (arguments.length === 0) {
                 this.log("arguments empty.");
@@ -107,15 +106,34 @@
         log: function(text, type, data) {
             type = type || "Info";
             this.Messages.push({
-                Type: type, 
-                Text: text, 
-                Data: data,
-                DateTime: new Date()
+                type: type, 
+                text: text, 
+                data: data,
+                dateTime: new Date()
                 });
-            if (this.LogChange && typeof this.LogChange === 'function')
-            {
-                this.LogChange.call(this, this.Messages);
+            
+            if (this.LogChange) {
+                var messages = this.Messages;
+                if (this.LogChange.constructor === Array) {                    
+                    this.LogChange.forEach(function(fn){
+                        if (fn && typeof fn === 'function') {
+                            fn.call(this, messages);
+                        }
+                    });
+                } else if (typeof this.LogChange === 'function') {
+                    this.LogChange.call(this, messages);
+                }
             }
+        },
+        
+        addEventListener: function(eventName, fn) {
+            if (eventName === 'logchange') {
+                if (this.LogChange.constructor !== Array) {
+                    this.LogChange = [];
+                }
+                this.LogChange.push(fn);
+            }
+            // else if ...
         },
 
         addEvent: function (element, eventName, fn) {
@@ -129,15 +147,14 @@
         }
 
     }
-
+    
     //console.log("Version: ", SimpleHtml.VERSION);
-    SimpleHtml.addEvent(window, "load", function () {
-                 
+    SimpleHtml.addEvent(window, "load", function () {               
         var simpleHtmls = document.getElementsByClassName(SimpleHtml.ClassName);
         [].forEach.call(simpleHtmls, function(element) {
             //console.log(element.getAttribute(SimpleHtml.JsonDataAttributeName));
             var shData = JSON.parse(element.getAttribute(SimpleHtml.JsonDataAttributeName));
-            SimpleHtml.htmlAjax(element, shData);
+            SimpleHtml.render(element, shData);
         });
 
     });
@@ -146,4 +163,4 @@
         //console.log(messages[messages.length - 1]);
     }
 
-}());
+//}());
